@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres
+    environment:
+      - POSTGRES_PASSWORD=1
+    ports:
+      - 5433:5432 
+      #docker postgres port setting was set to 5433 due to a conflict with the local postgres
+    volumes:
+      - pgdata:/var/lib/postgresql
+volumes:
+  pgdata:
+  
+  
