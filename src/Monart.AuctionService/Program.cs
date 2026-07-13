@@ -9,6 +9,7 @@ builder.Services.AddDbContext<AuctionDbContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddControllers();
 
 var app = builder.Build();
@@ -17,13 +18,8 @@ var app = builder.Build();
 
 app.UseAuthorization();
 
-//app.MapControllers();
-app.MapGet("/getall", async (AuctionDbContext context, CancellationToken cancellationToken) =>
-{
-    List<Auction> auctions = await context.Auctions.ToListAsync(cancellationToken);
+app.MapControllers();
 
-    return Results.Ok(auctions);
-});
 try
 {
     DbInitializer.InitDb(app);
