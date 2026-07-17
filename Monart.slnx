@@ -4,4 +4,5 @@
     <File Path="docker-compose.yml" />
   </Folder>
   <Project Path="src/Monart.AuctionService/Monart.AuctionService.csproj" />
+  <Project Path="src/Monart.SearchService/Monart.SearchService.csproj" />
 </Solution>

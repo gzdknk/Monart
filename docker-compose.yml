@@ -8,7 +8,17 @@ services:
       #docker postgres port setting was set to 5433 due to a conflict with the local postgres
     volumes:
       - pgdata:/var/lib/postgresql
+  mongodb:
+    image: mongo
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=1
+    ports: 
+      - 27017:27017
+    volumes:
+      - mongodata:/var/lib/mongodb/data
 volumes:
   pgdata:
+  mongodata:
   
   

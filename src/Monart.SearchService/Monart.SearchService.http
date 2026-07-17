@@ -1,0 +1,6 @@
+@Monart.SearchService_HostAddress = http://localhost:5051
+
+GET {{Monart.SearchService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
