@@ -1,4 +1,5 @@
 ﻿using Monart.SearchService.Entities;
+using Monart.SearchService.Services;
 using MongoDB.Driver;
 using MongoDB.Entities;
 using System.Text.Json;
@@ -20,18 +21,15 @@ namespace Monart.SearchService.Data
 
             var count = await DB.Default.CountAsync<Item>();
 
-            if(count == 0)
-            {
-                Console.WriteLine("No data - will attempt to seed");
+            using var scope = app.Services.CreateScope();
 
-                var itemData = await File.ReadAllTextAsync("Data/auctions.json");
+            var httpClient = scope.ServiceProvider.GetRequiredService<AuctionSvcHttpClient>();
 
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                
-                var items = JsonSerializer.Deserialize<List<Item>>(itemData, options);
+            var items = await httpClient.GetItemsForSearchDb();
 
-                await DB.Default.SaveAsync(items);
-            }
+            Console.WriteLine(items.Count + " returned from the auction service");
+
+            if(items.Count > 0) await DB.Default.SaveAsync(items);
 
         }
     }
