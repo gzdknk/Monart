@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using Monart.AuctionService.Entities;
 
 namespace Monart.AuctionService.Data
@@ -10,5 +11,13 @@ namespace Monart.AuctionService.Data
         }
 
         public DbSet<Auction> Auctions { get; set; }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.AddInboxStateEntity();
+            modelBuilder.AddOutboxMessageEntity();
+            modelBuilder.AddOutboxStateEntity();
+        }
     }
 }

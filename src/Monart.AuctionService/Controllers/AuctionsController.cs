@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Contracts.Auction;
+using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -15,12 +17,13 @@ namespace Monart.AuctionService.Controllers
     {
         private readonly AuctionDbContext _context;
         private readonly IMapper _mapper;
+        private readonly IPublishEndpoint _publishEndpoint;
 
-        public AuctionsController(AuctionDbContext context,IMapper mapper)
+        public AuctionsController(AuctionDbContext context,IMapper mapper,IPublishEndpoint publishEndpoint)
         {
             _context = context;
             _mapper = mapper;
-            _mapper = mapper;
+            _publishEndpoint = publishEndpoint;
         }
 
         [HttpGet]
@@ -57,12 +60,18 @@ namespace Monart.AuctionService.Controllers
 
             _context.Auctions.Add(auction);
 
+
+            var newAuction = _mapper.Map<AuctionDto>(auction);
+
+            await _publishEndpoint.Publish(_mapper.Map<AuctionCreated>(newAuction));
+
             var result = await _context.SaveChangesAsync() > 0;
+
 
             if (!result) return BadRequest("Could not save changes to the DB");
 
             return CreatedAtAction(nameof(GetAuctionById), 
-                new { auction.Id }, _mapper.Map<AuctionDto>(auction));
+                new { auction.Id }, newAuction);
         }
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateAuction(Guid id,UpdateAuctionDto updateAuctionDto)
@@ -77,9 +86,12 @@ namespace Monart.AuctionService.Controllers
 
             auction.Item.Title= updateAuctionDto.Title?? auction.Item.Title;
             auction.Item.Artist= updateAuctionDto.Artist?? auction.Item.Artist;
+            auction.Item.Year= updateAuctionDto.Year > 0 ? updateAuctionDto.Year : auction.Item.Year;
             auction.Item.Category= updateAuctionDto.Category?? auction.Item.Category;
             auction.Item.Dimensions= updateAuctionDto.Dimensions?? auction.Item.Dimensions;
             auction.Item.Description= updateAuctionDto.Description?? auction.Item.Description;
+
+            await _publishEndpoint.Publish(_mapper.Map<AuctionUpdated>(auction));
 
             var result = await _context.SaveChangesAsync() > 0;
 
@@ -97,6 +109,8 @@ namespace Monart.AuctionService.Controllers
             //TODO : check seller == username
 
             _context.Auctions.Remove(auction);
+
+            await _publishEndpoint.Publish<AuctionDeleted>( new { Id = auction.Id.ToString() });
 
             var result = await _context.SaveChangesAsync() > 0;
 
