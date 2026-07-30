@@ -5,6 +5,7 @@
   </Folder>
   <Project Path="src/Contracts/Contracts.csproj" Id="659b6e51-2d1d-4b0e-9196-ec84213bc6a6" />
   <Project Path="src/Monart.AuctionService/Monart.AuctionService.csproj" />
+  <Project Path="src/Monart.GatewayService/Monart.GatewayService.csproj" Id="7612c620-77da-4bfb-8d40-e6411aa53466" />
   <Project Path="src/Monart.IdentityService/Monart.IdentityService.csproj" />
   <Project Path="src/Monart.SearchService/Monart.SearchService.csproj" />
 </Solution>
