@@ -31,9 +31,16 @@ builder.Services.AddMassTransit(x =>
 
     x.UsingRabbitMq((context, cfg) =>
     {
+        cfg.Host(builder.Configuration["RabbitMq:Host"], "/", h =>
+        {
+            h.Username(builder.Configuration.GetValue("RabbitMq:Username", "guest"));
+            h.Password(builder.Configuration.GetValue("RabbitMq:Password", "guest"));
+        });
         cfg.ConfigureEndpoints(context);
     });
 });
+var authority = builder.Configuration["IdentityServiceUrl"];
+Console.WriteLine($"Authority: {authority}");
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -41,7 +48,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.Authority = builder.Configuration["IdentityServiceUrl"];
         options.RequireHttpsMetadata = false;
         options.TokenValidationParameters.ValidateAudience = false;
-        options.TokenValidationParameters.NameClaimType = "username";
+        options.TokenValidationParameters.NameClaimType = "username";  
     });
 
 var app = builder.Build();
@@ -60,5 +67,11 @@ catch (Exception e)
 {
     Console.WriteLine(e);
 }
+app.MapGet("/debug-metadata", async () =>
+{
+    using var client = new HttpClient();
 
+    return await client.GetStringAsync(
+        "http://identity-svc/.well-known/openid-configuration");
+});
 app.Run();

@@ -1,8 +1,10 @@
-using System.Globalization;
-using System.Text;
+using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Licensing;
+using Microsoft.Extensions.Options;
 using Monart.IdentityService;
 using Serilog;
+using System.Globalization;
+using System.Text;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console(formatProvider: CultureInfo.InvariantCulture)
@@ -19,6 +21,7 @@ try
         .ConfigureServices()
         .ConfigurePipeline();
 
+  
     // this seeding is only for the template to bootstrap the DB and users.
     // in production you will likely want a different approach.
 
@@ -32,7 +35,14 @@ try
             Console.Write(Summary(usage));
         });
     }
-
+    app.MapGet("/.well-known/test", (HttpContext ctx) =>
+    {
+        return Results.Ok(new
+        {
+            Host = ctx.Request.Host.Value,
+            Scheme = ctx.Request.Scheme
+        });
+    });
     app.Run();
 }
 catch (Exception ex) when (ex is not HostAbortedException)
